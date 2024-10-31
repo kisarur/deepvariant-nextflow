@@ -12,7 +12,7 @@ process MAKE_EXAMPLES {
     script:
     """
     seq 0 ${task.cpus - 1} | parallel -q --halt 2 --line-buffer /opt/deepvariant/bin/make_examples \\
-        --ref "${ref}" --reads "${reads}" --sample_name "${sample_name}" --examples "make_examples.tfrecord@${task.cpus}.gz" ${task.ext.args}
+        --mode calling --ref "${ref}" --reads "${reads}" --sample_name "${sample_name}" --examples "make_examples.tfrecord@${task.cpus}.gz" ${task.ext.args}
     """
 
 }

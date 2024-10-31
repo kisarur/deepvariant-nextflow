@@ -6,7 +6,7 @@ ref: '/path/to/reference.fa'
 output_dir: '/path/to/output_dir'
 
 container_path: '/path/to/deepvariant_1.6.1-gpu.sif'
-make_examples_args: '--mode calling --add_hp_channel --alt_aligned_pileup "diff_channels" --max_reads_per_partition "600" --min_mapping_quality "5" --parse_sam_aux_fields --partition_size "25000" --phase_reads --pileup_image_width "199" --norealign_reads --sort_by_haplotypes --track_ref_reads --vsc_min_fraction_indels "0.12" --vsc_min_fraction_snps "0.08" --task {}'
+make_examples_args: '--add_hp_channel --alt_aligned_pileup "diff_channels" --max_reads_per_partition "600" --min_mapping_quality "5" --parse_sam_aux_fields --partition_size "25000" --phase_reads --pileup_image_width "199" --norealign_reads --sort_by_haplotypes --track_ref_reads --vsc_min_fraction_indels "0.12" --vsc_min_fraction_snps "0.08" --task {}'
 call_variants_args: '--checkpoint "/opt/models/ont_r104"'
 
 nci_project: 'ab12'
