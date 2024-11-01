@@ -11,7 +11,7 @@ process MAKE_EXAMPLES {
     
     script:
     """
-    seq 0 ${task.cpus - 1} | parallel -q --halt 2 --line-buffer /opt/deepvariant/bin/make_examples \\
+    seq 0 ${task.cpus - 1} | parallel -q --halt 2 --line-buffer make_examples \\
         --mode calling --ref "${ref}" --reads "${reads}" --sample_name "${sample_name}" --examples "make_examples.tfrecord@${task.cpus}.gz" ${task.ext.args}
     """
 
@@ -29,7 +29,7 @@ process CALL_VARIANTS {
     def matcher = make_examples_out[0].baseName =~ /^(.+)-\d{5}-of-(\d{5})$/
     def num_shards = matcher[0][2] as int
     """
-    /opt/deepvariant/bin/call_variants --outfile "call_variants_output.tfrecord.gz" --examples "make_examples.tfrecord@${num_shards}.gz" ${task.ext.args}
+    call_variants --outfile "call_variants_output.tfrecord.gz" --examples "make_examples.tfrecord@${num_shards}.gz" ${task.ext.args}
     """
 
 }
@@ -47,8 +47,8 @@ process POSTPROCESS_VARIANTS_AND_VCF_STATS_REPORT {
 
     script:
     """
-    /opt/deepvariant/bin/postprocess_variants --ref "${ref}" --infile "call_variants_output.tfrecord.gz" --outfile "${sample_name}.vcf.gz" --cpus "${task.cpus}" --sample_name "${sample_name}"
-    /opt/deepvariant/bin/vcf_stats_report --input_vcf "${sample_name}.vcf.gz" --outfile_base "${sample_name}"
+    postprocess_variants --ref "${ref}" --infile "call_variants_output.tfrecord.gz" --outfile "${sample_name}.vcf.gz" --cpus "${task.cpus}" --sample_name "${sample_name}"
+    vcf_stats_report --input_vcf "${sample_name}.vcf.gz" --outfile_base "${sample_name}"
     """
 
 }
