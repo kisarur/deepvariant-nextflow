@@ -28,7 +28,7 @@ This repository contains a Nextflow pipeline for Google’s DeepVariant, optimis
     - `make_examples_args`, `call_variants_args` : arguments retrieved in [step 1](#retrieve-args).
     - `nci_project`, `nci_storage` : NCI project and storage
 
-3. Update `nextflow.config` to match the resource requirements for each stage of the pipeline. For NCI Gadi, it is recommended to adjust only `time` and `disk` (i.e. jobfs) parameters based on the size of the datasets used.
+3. Update `nextflow.config` to match the resource requirements for each stage of the pipeline. For NCI Gadi, you may need to adjust only `time` and `disk` (i.e. jobfs) parameters based on the size of the datasets used (the default values are tested to be suitable for a dataset of ~115GB in size).
 
 4. Run the pipeline with the following command:
     ```bash
