@@ -1,18 +1,45 @@
 #!/usr/bin/env nextflow
 
+process DRY_RUN {
+
+    input:
+    tuple path(ref), path(ref_fai)
+    tuple val(sample_name), path(reads), path(reads_bai), val(regions), val(model_type)
+
+    output:
+    tuple path(ref), path(ref_fai)
+    tuple val(sample_name), path(reads), path(reads_bai), val(regions), env(make_examples_args), env(call_variants_args)
+
+    script:
+    """
+    run_deepvariant \
+        --reads=$reads \
+        --ref=$ref \
+        --sample_name=$sample_name \
+        --model_type=$model_type \
+        --output_vcf=anything.vcf.gz \
+        --dry_run=true > commands.txt
+
+    make_examples_args=\$(grep "/opt/deepvariant/bin/make_examples" commands.txt | awk '{split(\$0, arr, "--add_hp_channel"); print "--add_hp_channel" arr[2]}' | sed 's/--sample_name "[^"]*"//g')
+    call_variants_args=\$(grep "/opt/deepvariant/bin/call_variants" commands.txt | awk '{split(\$0, arr, "--checkpoint"); print "--checkpoint" arr[2]}')
+    """
+
+}
+
 process MAKE_EXAMPLES {
 
     input:
     tuple path(ref), path(ref_fai)
-    tuple val(sample_name), path(reads), path(reads_bai)
+    tuple val(sample_name), path(reads), path(reads_bai), path(regions), val(make_examples_args), val(call_variants_args)
 
     output:
-    tuple val(sample_name), path('*.gz{,.example_info.json}')
+    tuple val(sample_name), path('*.gz{,.example_info.json}'), val(call_variants_args)
     
     script:
+    def regions_arg = regions ? "--regions ${regions}" : ""
     """
     seq 0 ${task.cpus - 1} | parallel -q --halt 2 --line-buffer make_examples \\
-        --mode calling --ref "${ref}" --reads "${reads}" --sample_name "${sample_name}" --examples "make_examples.tfrecord@${task.cpus}.gz" ${task.ext.args}
+        --mode calling --ref "${ref}" --reads "${reads}" --sample_name "${sample_name}" ${regions_arg} --examples "make_examples.tfrecord@${task.cpus}.gz" ${make_examples_args}
     """
 
 }
@@ -20,7 +47,7 @@ process MAKE_EXAMPLES {
 process CALL_VARIANTS {
 
     input:
-    tuple val(sample_name), path(make_examples_out)
+    tuple val(sample_name), path(make_examples_out), val(call_variants_args)
 
     output:
     tuple val(sample_name), path('*.gz')
@@ -29,7 +56,7 @@ process CALL_VARIANTS {
     def matcher = make_examples_out[0].baseName =~ /^(.+)-\d{5}-of-(\d{5})$/
     def num_shards = matcher[0][2] as int
     """
-    call_variants --outfile "call_variants_output.tfrecord.gz" --examples "make_examples.tfrecord@${num_shards}.gz" ${task.ext.args}
+    call_variants --outfile "call_variants_output.tfrecord.gz" --examples "make_examples.tfrecord@${num_shards}.gz" ${call_variants_args}
     """
 
 }
@@ -65,16 +92,20 @@ workflow {
 
     // Create a channel that holds tuples for each sample, containing the sample name, the BAM file and its index file. Throw an error if the index file is not found.
     ch_samples = Channel.of(params.samples).flatMap()
-    ch_samples = ch_samples.map { sample_name, reads ->
+    ch_samples = ch_samples.map { sample_name, reads, regions, model_type ->
         def reads_bai = file("${reads}.bai")
         if (!reads_bai.exists()) {
             throw new RuntimeException("BAM index file not found for sample: ${sample_name}, expected at: ${reads_bai}")
         }
-        [ sample_name, file(reads), reads_bai ]
+        def regions_val = regions == '' ? [] : regions
+        [ sample_name, file(reads), reads_bai, regions_val, model_type ]
     }
 
+    // Do a dry run of DeepVariant to extract the arguments for MAKE_EXAMPLES and CALL_VARIANTS stages
+    DRY_RUN(ch_ref, ch_samples)
+
     // Run the DeepVariant pipeline in three stages
-    MAKE_EXAMPLES(ch_ref, ch_samples) 
+    MAKE_EXAMPLES(DRY_RUN.out) 
     CALL_VARIANTS(MAKE_EXAMPLES.out) 
     POSTPROCESS_VARIANTS_AND_VCF_STATS_REPORT(ch_ref, CALL_VARIANTS.out)
 
