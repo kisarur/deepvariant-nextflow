@@ -8,8 +8,7 @@ This repository contains a Nextflow pipeline for Google’s DeepVariant, optimis
     - `samples`:  a list of samples, where each sample includes the sample name, BAM file path (ensure corresponding .bai is in the same directory), path to an optional regions-of-interest BED file (set to `''` if not required), and the model type.
     - `ref`: path to the reference FASTA (ensure corresponding .fai is in the same directory).
     - `output_dir`: directory path to save output files.
-    - `container_path`: path to DeepVariant Singularity image
-    - `nci_project`, `nci_storage` : NCI project and storage
+    - `nci_project`, `nci_storage` : NCI project and storage.
 
 3. Update `nextflow.config` to match the resource requirements for each stage of the pipeline. For NCI Gadi, you may need to adjust only `time` and `disk` (i.e. jobfs) parameters based on the size of the datasets used (the default values are tested to be suitable for a dataset of ~115GB in size).
 
