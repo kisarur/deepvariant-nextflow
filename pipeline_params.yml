@@ -5,7 +5,5 @@ samples:
 ref: '/path/to/reference.fa'
 output_dir: '/path/to/output_dir'
 
-container_path: '/path/to/deepvariant_1.6.1-gpu.sif'
-
 nci_project: 'ab12'
-nci_storage: 'gdata/ab12'
+nci_storage: 'gdata/if89+gdata/ab12'

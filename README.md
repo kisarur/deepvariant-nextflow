@@ -21,3 +21,7 @@ This repository contains a Nextflow pipeline for Google’s DeepVariant, optimis
     Note: Additional Nextflow options can be included (e.g., `-resume` to resume from a previously paused/interrupted run)
 
 5. For each sample, output files will be stored in the directory `output_dir/sample_name`.
+
+## Notes  
+
+1. It is assumed that the user has access to NCI's `if89` project (required for using DeepVariant via `module load`). If not, simply request access using this [link](https://my.nci.org.au/mancini/project/if89).
