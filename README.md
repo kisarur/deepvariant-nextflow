@@ -37,3 +37,9 @@ A case study was conducted using a ~115GB BAM alignment file from a HG002 ONT wh
 ### Notes
 - Negligible runtime/SU values for the `DRY_RUN` stage (<1 minute/<1 SU) have been excluded from the results.
 - Queueing times, which were similar for both cases, have been omitted.
+
+## Acknowledgments
+
+The *deepvariant-nextflow* workflow was developed by Dr Kisaru Liyanage and Dr Matthew Downton (National Computational Infrastructure), with support from Australian BioCommons as part of the Workflow Commons project.
+
+We thank Leah Kemp (Garvan Institute of Medical Research) for her collaboration in providing test datasets and assisting with pipeline testing.
