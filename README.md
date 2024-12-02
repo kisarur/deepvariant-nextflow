@@ -24,3 +24,16 @@ This repository contains a Nextflow pipeline for Google’s DeepVariant, optimis
 ## Notes  
 
 1. It is assumed that the user has access to NCI's `if89` project (required for using DeepVariant via `module load`). If not, simply request access using this [link](https://my.nci.org.au/mancini/project/if89).
+
+## Case Study
+
+A case study was conducted using a ~115GB BAM alignment file from a HG002 ONT whole genome sequencing (WGS) dataset to evaluate the runtime and service unit (SU) efficiency of *deepvariant-nextflow* compared to the original DeepVariant running on a single node. The benchmarking results are summarised in the table below.
+
+| **Version** | **Gadi Resources** | **Runtime (hh:mm:ss)** | **SUs** |
+|---|---|---|---|
+| Original DeepVariant | `gpuvolta` (48 CPUs, 4 GPUs, 384 GB memory) | 03:18:31 | 476.44 |
+| deepvariant-nextflow | `normalsr` (104 CPUs, 500 GB memory) → `gpuvolta` (12 CPUs, 1 GPU, 96 GB memory) → `normalbw` (28 CPUs, 256 GB memory) | 02:04:35 | 199 |
+
+### Notes
+- Negligible runtime/SU values for the `DRY_RUN` stage (<1 minute/<1 SU) have been excluded from the results.
+- Queueing times, which were similar for both cases, have been omitted.
