@@ -20,8 +20,8 @@ process DRY_RUN {
         --output_vcf=anything.vcf.gz \
         --dry_run=true > commands.txt
 
-    make_examples_args=\$(grep "/opt/deepvariant/bin/make_examples" commands.txt | awk '{split(\$0, arr, "--add_hp_channel"); print "--add_hp_channel" arr[2]}' | sed 's/--sample_name "[^"]*"//g')
-    call_variants_args=\$(grep "/opt/deepvariant/bin/call_variants" commands.txt | awk '{split(\$0, arr, "--checkpoint"); print "--checkpoint" arr[2]}')
+    make_examples_args=\$(grep "/opt/deepvariant/bin/make_examples" commands.txt | awk -F'/opt/deepvariant/bin/make_examples' '{print \$2}' | sed 's/--mode calling//g' | sed 's/--ref "[^"]*"//g' | sed 's/--reads "[^"]*"//g' | sed 's/--sample_name "[^"]*"//g' | sed 's/--examples "[^"]*"//g')
+    call_variants_args=\$(grep "/opt/deepvariant/bin/call_variants" commands.txt | awk -F'/opt/deepvariant/bin/call_variants' '{print \$2}' | sed 's/--outfile "[^"]*"//g' | sed 's/--examples "[^"]*"//g')
     """
 
 }
