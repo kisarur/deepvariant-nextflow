@@ -41,33 +41,22 @@ A case study was conducted using a ~115GB BAM alignment file from a HG002 ONT wh
     </thead>
     <tbody>
         <tr>
-            <td rowspan=2>Original DeepVariant</td>
-            <td><code>gpuvolta</code> (24 CPUs, 2 GPUs, 192 GB memory)</td>
-            <td>05:07:21</td>
-            <td>368.82</td>
-        </tr>
-        <tr>
+            <td>Original DeepVariant</td>
             <td><code>gpuvolta</code> (48 CPUs, 4 GPUs, 384 GB memory)</td>
-            <td>03:18:31</td>
-            <td>476.44</td>
+            <td>00:55:56</td>
+            <td>134.24</td>
         </tr>
         <tr>
-            <td rowspan=2><i>deepvariant-nextflow</i></td>
-            <td><code>normal</code> (48 CPUs, 192 GB memory) → <code>gpuvolta</code> (12 CPUs, 1 GPU, 96 GB memory) → <code>normalbw</code> (28 CPUs, 256 GB memory) </td>
-            <td>03:21:01</td>
-            <td>237.33</td>
-        </tr>
-        <tr>
-            <td><code>normalsr</code> (104 CPUs, 500 GB memory) → <code>gpuvolta</code> (12 CPUs, 1 GPU, 96 GB memory) → <code>normalbw</code> (28 CPUs, 256 GB memory) </td>
-            <td>02:04:35</td>
-            <td>199</td>
+            <td><i>deepvariant-nextflow</i></td>
+            <td><code>normalsr</code> (104 CPUs, 500 GB memory) → <code>gpuvolta</code> (12 CPUs, 1 GPU, 96 GB memory) → <code>normal</code> (24 CPUs, 96 GB memory) </td>
+            <td>00:34:10</td>
+            <td>73.16</td>
         </tr>
     </tbody>
 </table>
 
 ### Notes
-- Negligible runtime/SU values for the `DRY_RUN` stage (<1 minute/<1 SU) have been excluded from the results.
-- Total queueing times, which were similar across all cases, have been omitted.
+- Total queueing times, which were similar in both cases, have been excluded from the runtimes.
 
 ## Acknowledgments
 
