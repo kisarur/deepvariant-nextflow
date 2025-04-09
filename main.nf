@@ -33,7 +33,7 @@ process MAKE_EXAMPLES {
     tuple val(sample_name), path(reads), path(reads_bai), path(regions), val(make_examples_args), val(call_variants_args)
 
     output:
-    tuple val(sample_name), path('*.gz{,.example_info.json}'), val(call_variants_args)
+    tuple val(sample_name), path('make_examples.*.gz{,.example_info.json}'), path('make_examples_call_variant_outputs.*.gz'), val(call_variants_args)
     
     script:
     def regions_arg = regions ? "--regions ${regions}" : ""
@@ -47,10 +47,10 @@ process MAKE_EXAMPLES {
 process CALL_VARIANTS {
 
     input:
-    tuple val(sample_name), path(make_examples_out), val(call_variants_args)
+    tuple val(sample_name), path(make_examples_out), val(make_examples_call_variant_out), val(call_variants_args)
 
     output:
-    tuple val(sample_name), path('*.gz')
+    tuple val(sample_name), path('call_variants_output*.gz'), val(make_examples_call_variant_out)
 
     script:
     def matcher = make_examples_out[0].baseName =~ /^(.+)-\d{5}-of-(\d{5})$/
@@ -61,21 +61,22 @@ process CALL_VARIANTS {
 
 }
 
-process POSTPROCESS_VARIANTS_AND_VCF_STATS_REPORT {
+process POSTPROCESS_VARIANTS {
 
     publishDir "${params.output_dir}/${sample_name}" , mode: 'copy'
 
     input:
     tuple path(ref), path(ref_fai)
-    tuple val(sample_name), path(call_variants_out)
+    tuple val(sample_name), path(call_variants_out), path(make_examples_call_variant_out)
 
     output:
     path("${sample_name}.*")
 
     script:
+    def matcher = make_examples_call_variant_out[0].baseName =~ /^(.+)-\d{5}-of-(\d{5})$/
+    def num_shards = matcher[0][2] as int
     """
-    postprocess_variants --ref "${ref}" --infile "call_variants_output.tfrecord.gz" --outfile "${sample_name}.vcf.gz" --cpus "${task.cpus}" --sample_name "${sample_name}"
-    vcf_stats_report --input_vcf "${sample_name}.vcf.gz" --outfile_base "${sample_name}"
+    postprocess_variants --ref "${ref}" --infile "call_variants_output.tfrecord.gz" --outfile "${sample_name}.vcf.gz" --cpus "${task.cpus}" --small_model_cvo_records "make_examples_call_variant_outputs.tfrecord@${num_shards}.gz" --sample_name "${sample_name}"
     """
 
 }
@@ -107,6 +108,6 @@ workflow {
     // Run the DeepVariant pipeline in three stages
     MAKE_EXAMPLES(DRY_RUN.out) 
     CALL_VARIANTS(MAKE_EXAMPLES.out) 
-    POSTPROCESS_VARIANTS_AND_VCF_STATS_REPORT(ch_ref, CALL_VARIANTS.out)
+    POSTPROCESS_VARIANTS(ch_ref, CALL_VARIANTS.out)
 
 }
